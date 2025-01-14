@@ -3,16 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Motherson Rosslyn Plant</title>
+  <title>Rosslyn Plant</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      text-align: center;
       margin: 0;
       padding: 0;
       background: url('Motherson.jpg') no-repeat center center fixed;
       background-size: cover;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      text-align: center;
       color: white;
+    }
+    .content {
+      background: rgba(0, 0, 0, 0.6); /* Semi-transparent background */
+      padding: 20px;
+      border-radius: 10px;
     }
     h1 {
       color: white;
@@ -26,14 +35,11 @@
       font-size: 14px;
       text-transform: lowercase;
     }
-    .stripes {
-      width: 60px;
-      height: 8px;
-      background-color: white;
-      margin: 5px auto;
+    .logo {
+      margin-bottom: 20px;
     }
-    .stripes:nth-child(1) {
-      margin-top: 20px;
+    .logo img {
+      width: 60px; /* Adjust size as needed */
     }
   </style>
   <script>
@@ -44,11 +50,13 @@
   </script>
 </head>
 <body>
-  <div class="stripes"></div>
-  <div class="stripes"></div>
-  <div class="stripes"></div>
-  <h1>Welcome to</h1>
-  <h2>Motherson Rosslyn Plant</h2>
-  <p>paintshop department</p>
+  <div class="content">
+    <div class="logo">
+      <img src="motherson.jpg" alt="Adidas Stripes">
+    </div>
+    <h1>Welcome to</h1>
+    <h2>Rosslyn Plant</h2>
+    <p>paintshop department</p>
+  </div>
 </body>
 </html>
