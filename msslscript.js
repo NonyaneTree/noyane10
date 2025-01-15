@@ -60,10 +60,7 @@ function loadFromLocalStorage() {
     const existingData = JSON.parse(localStorage.getItem("loadingSheetData")) || {};
     const tableBody = document.querySelector("#loadingSheet tbody");
 
-    // Clear existing rows
-    tableBody.innerHTML = "";
-
-    // Iterate over each data entry and populate the table
+    // Iterate over each data entry and populate the table without clearing existing rows
     Object.values(existingData).forEach((tableData) => {
         tableData.forEach((data) => {
             const row = document.createElement("tr");
