@@ -29,24 +29,54 @@ function loadFromLocalStorage() {
     tableData.forEach((data) => {
         const row = document.createElement("tr");
         row.innerHTML = `
-            <td><select><option value="${data.part}" selected>${data.part}</option></select></td>
-            <td><select><option value="${data.color}" selected>${data.color}</option></select></td>
+            <td>
+                <select onchange="loadRowData(this)">
+                    <option value="H Bar_WLT" ${data.part === "H Bar_WLT" ? "selected" : ""}>H Bar_WLT</option>
+                    <option value="H_Bar LTD" ${data.part === "H_Bar LTD" ? "selected" : ""}>H_Bar LTD</option>
+                    <option value="WLT" ${data.part === "WLT" ? "selected" : ""}>WLT</option>
+                </select>
+            </td>
+            <td>
+                <select onchange="loadRowData(this)">
+                    <option value="Boulder Gray" ${data.color === "Boulder Gray" ? "selected" : ""}>Boulder Gray</option>
+                    <option value="Black" ${data.color === "Black" ? "selected" : ""}>Black</option>
+                </select>
+            </td>
             <td class="total-cell">${data.total}</td>
-            <td><input type="number" class="number-input" value="${data.rework}" onchange="updateValue(this, 'rework')" /></td>
-            <td><input type="number" class="number-input" value="${data.polished}" onchange="updateValue(this, 'polished')" /></td>
-            <td><input type="number" class="number-input" value="${data.scrap}" onchange="updateValue(this, 'scrap')" /></td>
+            <td><input type="number" class="number-input" value="${data.rework}" onchange="updateValue(this)" /></td>
+            <td><input type="number" class="number-input" value="${data.polished}" onchange="updateValue(this)" /></td>
+            <td><input type="number" class="number-input" value="${data.scrap}" onchange="updateValue(this)" /></td>
             <td><input type="text" class="remarks-input" value="${data.remarks}" /></td>
         `;
         tableBody.appendChild(row);
     });
 }
 
-// Update value and recalculate totals
-function updateValue(input, type) {
+// Load row data when part and color are selected
+function loadRowData(selectElement) {
+    const row = selectElement.closest("tr");
+    const selectedPart = row.querySelector("td:nth-child(1) select").value;
+    const selectedColor = row.querySelector("td:nth-child(2) select").value;
+
+    const tableData = JSON.parse(localStorage.getItem("loadingSheetData")) || [];
+    const matchingData = tableData.find(
+        (data) => data.part === selectedPart && data.color === selectedColor
+    );
+
+    if (matchingData) {
+        row.querySelector("td:nth-child(3)").textContent = matchingData.total;
+        row.querySelector("td:nth-child(4) input").value = matchingData.rework;
+        row.querySelector("td:nth-child(5) input").value = matchingData.polished;
+        row.querySelector("td:nth-child(6) input").value = matchingData.scrap;
+        row.querySelector("td:nth-child(7) input").value = matchingData.remarks;
+    }
+}
+
+// Update value dynamically and save changes
+function updateValue(input) {
     const row = input.closest("tr");
     const totalCell = row.querySelector(".total-cell");
 
-    // Calculate total
     const rework = parseInt(row.querySelector("td:nth-child(4) input").value) || 0;
     const polished = parseInt(row.querySelector("td:nth-child(5) input").value) || 0;
     const scrap = parseInt(row.querySelector("td:nth-child(6) input").value) || 0;
@@ -54,39 +84,37 @@ function updateValue(input, type) {
     const total = rework + polished + scrap;
     totalCell.textContent = total;
 
-    // Save updated data to local storage
-    saveToLocalStorage();
+    saveToLocalStorage(); // Save updated values
 }
 
-// Add a new row
+// Add a new row dynamically
 function addRow() {
     const tableBody = document.querySelector("#loadingSheet tbody");
     const newRow = document.createElement("tr");
     newRow.innerHTML = `
         <td>
-            <select>
+            <select onchange="loadRowData(this)">
                 <option value="H Bar_WLT">H Bar_WLT</option>
                 <option value="H_Bar LTD">H_Bar LTD</option>
-                <!-- Add other options -->
+                <option value="WLT">WLT</option>
             </select>
         </td>
         <td>
-            <select>
+            <select onchange="loadRowData(this)">
                 <option value="Boulder Gray">Boulder Gray</option>
                 <option value="Black">Black</option>
-                <!-- Add other options -->
             </select>
         </td>
         <td class="total-cell">0</td>
-        <td><input type="number" class="number-input" value="0" onchange="updateValue(this, 'rework')" /></td>
-        <td><input type="number" class="number-input" value="0" onchange="updateValue(this, 'polished')" /></td>
-        <td><input type="number" class="number-input" value="0" onchange="updateValue(this, 'scrap')" /></td>
+        <td><input type="number" class="number-input" value="0" onchange="updateValue(this)" /></td>
+        <td><input type="number" class="number-input" value="0" onchange="updateValue(this)" /></td>
+        <td><input type="number" class="number-input" value="0" onchange="updateValue(this)" /></td>
         <td><input type="text" class="remarks-input" /></td>
     `;
     tableBody.appendChild(newRow);
 }
 
-// Generate PDF
+// Generate PDF and redirect
 function generatePDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
@@ -104,6 +132,11 @@ function generatePDF() {
     });
 
     doc.save("PP2_Off_Loading_Sheet.pdf");
+
+    // Redirect to monthly.html with data
+    const tableData = JSON.parse(localStorage.getItem("loadingSheetData"));
+    localStorage.setItem("monthlyData", JSON.stringify(tableData));
+    window.location.href = "monthly.html";
 }
 
 // Initialize
