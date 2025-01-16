@@ -151,53 +151,99 @@
     <button class="add-row-btn" onclick="addRow()">Add Row</button>
     <button class="compile-btn" onclick="generatePDF()">Compile PDF</button>
 
-    <!-- Link to External JavaScript -->
-    <script src="script.js"></script>
-</body>
-</html><script>// Save data to local storage
-function saveToLocalStorage() {
-    const tableData = [];
-    const rows = document.querySelectorAll("tbody tr");
-    rows.forEach((row) => {
-        const cells = row.querySelectorAll("td");
-        tableData.push({
-            part: cells[0].querySelector("select").value,
-            color: cells[1].querySelector("select").value,
-            total: cells[2].textContent,
-            rework: cells[3].querySelector("input").value,
-            polished: cells[4].querySelector("input").value,
-            scrap: cells[5].querySelector("input").value,
-            remarks: cells[6].querySelector("input").value,
-            reworkDefect: cells[3].querySelector("select").value,
-            scrapDefect: cells[5].querySelector("select").value,
-        });
-    });
-    localStorage.setItem("loadingSheetData", JSON.stringify(tableData));
-}
+    <script>
+        function calculate(button, type) {
+            const cell = button.parentNode;
+            const inputs = cell.getElementsByTagName("input");
+            const firstInput = inputs[0];
+            const secondInput = inputs[1];
 
-// Load data from local storage
-function loadFromLocalStorage() {
-    const tableData = JSON.parse(localStorage.getItem("loadingSheetData"));
-    if (tableData) {
-        const table = document.getElementById("loadingSheet").getElementsByTagName("tbody")[0];
-        table.innerHTML = ""; // Clear existing rows
-        tableData.forEach((data) => {
+            const sum = parseInt(firstInput.value || 0) + parseInt(secondInput.value || 0);
+            firstInput.value = sum; // Update the first input
+            secondInput.value = 0; // Reset the second input
+
+            calculateTotal(button); // Update the total after calculation
+        }
+
+        function calculateTotal(button) {
+            const row = button.closest("tr");
+            const rework = parseInt(row.querySelector(".rework-cell input").value || 0);
+            const polished = parseInt(row.querySelector(".polished-cell input").value || 0);
+            const scrap = parseInt(row.querySelector(".scrap-cell input").value || 0);
+
+            const totalCell = row.querySelector(".total-cell");
+            totalCell.textContent = rework + polished + scrap; // Update the Total column
+        }
+
+        function reset(button) {
+            const cell = button.parentNode;
+            const inputs = cell.getElementsByTagName("input");
+            inputs[0].value = 0;
+            inputs[1].value = 0;
+
+            calculateTotal(button); // Update the total after reset
+        }
+
+        function addRow() {
+            const table = document.getElementById('loadingSheet').getElementsByTagName('tbody')[0];
             const newRow = table.insertRow();
             newRow.innerHTML = document.querySelector("tbody tr").innerHTML;
-            const cells = newRow.querySelectorAll("td");
-            cells[0].querySelector("select").value = data.part;
-            cells[1].querySelector("select").value = data.color;
-            cells[2].textContent = data.total;
-            cells[3].querySelector("input").value = data.rework;
-            cells[4].querySelector("input").value = data.polished;
-            cells[5].querySelector("input").value = data.scrap;
-            cells[6].querySelector("input").value = data.remarks;
-            cells[3].querySelector("select").value = data.reworkDefect;
-            cells[5].querySelector("select").value = data.scrapDefect;
-        });
-    }
-}
 
-// Attach save functionality to relevant events
-document.addEventListener("input", saveToLocalStorage);
-document.addEventListener("DOMContentLoaded", loadFromLocalStorage);</script>
+            // Reset inputs in the new row
+            const inputs = newRow.querySelectorAll("input");
+            inputs.forEach(input => input.value = 0);
+
+            const totalCell = newRow.querySelector(".total-cell");
+            totalCell.textContent = 0; // Reset Total column
+        }
+
+        async function generatePDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            doc.setFontSize(16);
+            doc.text("PP2 Off Loading Sheet", 10, 10);
+
+            let y = 20;
+            doc.setFontSize(12);
+            doc.text("Part", 10, y);
+            doc.text("Color", 60, y);
+            doc.text("Total", 110, y);
+            doc.text("Rework (Defect)", 140, y);
+            doc.text("Polished", 180, y);
+            doc.text("Scrap (Defect)", 220, y);
+            doc.text("Remarks", 260, y);
+            y += 10;
+
+            const rows = document.querySelectorAll("tbody tr");
+            rows.forEach((row) => {
+                const cells = row.querySelectorAll("td");
+                const reworkDefect = cells[3].querySelector("select").value;
+                const scrapDefect = cells[5].querySelector("select").value;
+                doc.text(cells[0].querySelector("select").value, 10, y);
+                doc.text(cells[1].querySelector("select").value, 60, y);
+                doc.text(cells[2].textContent, 110, y);
+                doc.text(`${cells[3].querySelector("input").value} (${reworkDefect})`, 140, y);
+                doc.text(cells[4].querySelector("input").value, 180, y);
+                doc.text(`${cells[5].querySelector("input").value} (${scrapDefect})`, 220, y);
+                doc.text(cells[6].querySelector("input").value, 260, y);
+                y += 10;
+            });
+
+            doc.save("PP2_Off_Loading_Sheet.pdf");
+        }
+        <thead>
+    <tr>
+        <th>Part</th>
+        <th>Color</th>
+        <th>Total</th>
+        <th>Rework</th>
+        <th>Polished</th>
+        <th>Scrap</th>
+        <th>Remarks</th>
+        <th>Date</th> <!-- New Date Column -->
+    </tr>
+</thead>
+    </script>
+</body>
+</html>
