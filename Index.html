@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .splash-text {
+            position: absolute;
+            font-size: 32px;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+        
+        .progress-bar {
+            width: 80%;
+            height: 10px;
+            background-color: #ddd;
+            margin-top: 20px;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .progress {
+            width: 0%;
+            height: 100%;
+            background-color: #4CAF50;
+            transition: width 6s linear;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="splash-text" class="splash-text">Hello</div>
+
+    <div class="progress-bar">
+        <div id="progress" class="progress"></div>
+    </div>
+
+    <script>
+        const names = ["Hello", "Sawubona", "Aweh", "Dumela", "Heita", "Unjani", "Howzit", "Molo", "Ndaa", "Thobela", "Abuxeni", "Avuxeni", "Goeie dag", "Lotjhani", "Molweni"];
+        let index = 0;
+        const textElement = document.getElementById("splash-text");
+        const progressElement = document.getElementById("progress");
+
+        function showNextName() {
+            if (index < names.length) {
+                // Set new text
+                textElement.textContent = names[index];
+                index++;
+
+                // Randomize position
+                textElement.style.top = Math.floor(Math.random() * 60 + 20) + "%";
+                textElement.style.left = Math.floor(Math.random() * 60 + 20) + "%";
+
+                // Show text
+                textElement.style.opacity = "1";
+
+                // Animate progress bar
+                progressElement.style.width = ((index / names.length) * 100) + "%";
+
+                // Hide after 5 seconds
+                setTimeout(() => {
+                    textElement.style.opacity = "0";
+                }, 5000);
+            } else {
+                // Redirect after last name
+                setTimeout(() => {
+                    window.location.href = "tenders.html";
+                }, 6000);
+            }
+        }
+
+        // Show first name immediately
+        showNextName();
+
+        // Show next name every 6 seconds
+        setInterval(showNextName, 6000);
+    </script>
+
+</body>
+  </html>
