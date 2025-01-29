@@ -1,0 +1,90 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Item List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            color: #333;
+        }
+        .container {
+            max-width: 400px;
+            margin: 20px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .item:last-child {
+            border-bottom: none;
+        }
+        .total {
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        .checkout {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            border-radius: 5px;
+        }
+        .checkout:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Item List</h1>
+    
+    <div class="container">
+        <div class="item">
+            <span>Gloves</span>
+            <span>R200</span>
+        </div>
+        <div class="item">
+            <span>Safety Glasses</span>
+            <span>R35</span>
+        </div>
+        <div class="item">
+            <span>Safety Boots</span>
+            <span>R1400</span>
+        </div>
+
+        <div class="total">
+            Total: <span id="total-price">R1635</span>
+        </div>
+
+        <button class="checkout" onclick="checkout()">Checkout</button>
+    </div>
+
+    <script>
+        function checkout() {
+            const selectedItems = [
+                { name: "Gloves", price: 200 },
+                { name: "Safety Glasses", price: 35 },
+                { name: "Safety Boots", price: 1400 }
+            ];
+            const cartData = encodeURIComponent(JSON.stringify(selectedItems));
+            window.location.href = `checkout.html?cart=${cartData}`;
+        }
+    </script>
+
+</body>
+</html>
