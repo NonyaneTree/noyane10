@@ -54,7 +54,7 @@
     <div class="container">
         <h1>Forex Trading</h1>
         <div class="balance">
-            Balance: <span id="balance">30,000,000 Rands</span>
+            Balance: <span id="balance">0 Rands</span>
         </div>
         <div class="trade-panel">
             <select id="pair">
@@ -73,8 +73,10 @@
     </div>
 
     <script>
-        // Mock Forex Data
-        let balance = 30000000; // Starting balance in Rands
+        // Fetch initial balance from localStorage
+        let balance = parseFloat(localStorage.getItem("balance")) || 30000000; // Starting balance in Rands
+        document.getElementById('balance').textContent = balance.toLocaleString() + ' Rands';
+
         let chartData = {
             labels: [], // Time labels
             datasets: [{
@@ -100,16 +102,37 @@
                 plugins: {
                     annotation: {
                         annotations: {
-                            trendline: {
+                            wFormation: {
                                 type: 'line',
-                                borderColor: 'orange',
+                                borderColor: 'blue',
                                 borderWidth: 2,
-                                borderDash: [5, 5],
                                 label: {
-                                    content: 'Trendline',
-                                    enabled: true
-                                }
-                            }
+                                    content: 'W Formation',
+                                    enabled: true,
+                                    position: 'start'
+                                },
+                                // Example coordinates, adjust as needed
+                                xMin: 2,
+                                xMax: 4,
+                                yMin: 50,
+                                yMax: 60
+                            },
+                            mFormation: {
+                                type: 'line',
+                                borderColor: 'red',
+                                borderWidth: 2,
+                                label: {
+                                    content: 'M Formation',
+                                    enabled: true,
+                                    position: 'start'
+                                },
+                                // Example coordinates, adjust as needed
+                                xMin: 5,
+                                xMax: 7,
+                                yMin: 60,
+                                yMax: 50
+                            },
+                            // Add more formations here
                         }
                     }
                 }
@@ -127,25 +150,17 @@
         }
         setInterval(updateChart, 1000); // Update every second
 
-        // RSI Calculation (Mock)
-        function calculateRSI() {
-            const prices = chartData.datasets[0].data;
-            if (prices.length < 14) return 50; // Default RSI
-            let gains = 0, losses = 0;
-            for (let i = 1; i < 15; i++) {
-                const change = prices[prices.length - i] - prices[prices.length - i - 1];
-                if (change > 0) gains += change;
-                else losses -= change;
-            }
-            const rs = gains / losses;
-            return 100 - (100 / (1 + rs));
-        }
-
         // Open Trade
         function openTrade(type) {
             const pair = document.getElementById('pair').value;
             const lotSize = parseInt(document.getElementById('lotSize').value);
             const currentPrice = chartData.datasets[0].data[chartData.datasets[0].data.length - 1];
+
+            if (!currentPrice) {
+                alert('No price data available.');
+                return;
+            }
+
             const tradeAmount = lotSize * currentPrice;
 
             if (tradeAmount > balance) {
@@ -154,6 +169,7 @@
             }
 
             balance -= tradeAmount;
+            localStorage.setItem("balance", balance); // Update balance in localStorage
             updateBalance();
 
             // Simulate Trade Outcome
@@ -161,6 +177,7 @@
                 const outcome = Math.random() > 0.5 ? 'win' : 'loss';
                 const profitLoss = outcome === 'win' ? tradeAmount * 1.1 : tradeAmount * 0.9;
                 balance += profitLoss;
+                localStorage.setItem("balance", balance); // Update balance in localStorage
                 updateBalance();
                 alert(`Trade ${outcome}! ${profitLoss.toFixed(2)} Rands ${outcome === 'win' ? 'gained' : 'lost'}.`);
             }, 5000); // Simulate 5-second trade
@@ -169,8 +186,9 @@
         // Add Funds
         function addFunds() {
             const amount = parseFloat(prompt('Enter amount to add:'));
-            if (!isNaN(amount) {
+            if (!isNaN(amount)) {
                 balance += amount;
+                localStorage.setItem("balance", balance); // Update balance in localStorage
                 updateBalance();
             }
         }
@@ -180,8 +198,9 @@
             const amount = parseFloat(prompt('Enter amount to withdraw:'));
             if (!isNaN(amount) && amount <= balance) {
                 balance -= amount;
+                localStorage.setItem("balance", balance); // Update balance in localStorage
                 updateBalance();
-                alert(`Withdrawn ${amount} Rands to game.html.`);
+                alert(`Withdrawn ${amount} Rands.`);
             } else {
                 alert('Invalid amount or insufficient balance.');
             }
