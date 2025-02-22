@@ -1,28 +1,55 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Commodities Trading</title>
     <style>
         body {
-            background-color: blue;
-            color: white;
-            text-align: center;
+            background-color: #1a1a1a;
+            color: #ffffff;
             font-family: Arial, sans-serif;
             margin: 0;
-            padding: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        h2 {
+            margin: 10px 0;
         }
         .commodity {
-            margin: 20px;
+            background-color: #333;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px auto;
+            display: inline-block;
+            width: 250px;
+            transition: transform 0.2s;
+        }
+        .commodity:hover {
+            transform: scale(1.05);
         }
         .icon {
             width: 100px;
             height: auto;
             cursor: pointer;
         }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
     </style>
     <script>
-        let balance = 30000000;
         let commodityPrices = {
             gold: Math.floor(Math.random() * (4000 - 500 + 1)) + 500,
             silver: Math.floor(Math.random() * (1000 - 50 + 1)) + 50,
@@ -51,30 +78,46 @@
                 commodityPrices[key] = Math.floor(Math.random() * (commodityPrices[key] * 1.2 - commodityPrices[key] * 0.8 + 1)) + commodityPrices[key] * 0.8;
                 document.getElementById(`${key}Price`).textContent = "$" + commodityPrices[key].toFixed(2);
             }
+            document.getElementById("balance").textContent = localStorage.getItem("balance") ? localStorage.getItem("balance") + " Rands" : "0 Rands";
         }
 
         function buyCommodity(type) {
             let amount = prompt("Enter amount to buy in USD:");
             amount = parseFloat(amount);
+            let balance = parseFloat(localStorage.getItem("balance")) || 0;
+
             if (isNaN(amount) || amount <= 0 || amount > balance) {
-                alert("Invalid amount");
+                alert("Invalid amount or insufficient balance.");
                 return;
             }
             ownedCommodities[type] += amount / commodityPrices[type];
             balance -= amount;
-            document.getElementById(`owned${type}`).textContent = `${type.charAt(0).toUpperCase() + type.slice(1)} Owned: ` + ownedCommodities[type].toFixed(2) + " units";
+            localStorage.setItem("balance", balance);
+            document.getElementById(`owned${type}`).textContent = `${type.charAt(0).toUpperCase() + type.slice(1)} Owned: ${ownedCommodities[type].toFixed(2)} units`;
+            updatePrices(); // Update balance display
         }
 
         function sellCommodity(type) {
             let amount = prompt("Enter amount to sell in USD:");
             amount = parseFloat(amount);
+            let balance = parseFloat(localStorage.getItem("balance")) || 0;
+
             if (isNaN(amount) || amount <= 0 || amount / commodityPrices[type] > ownedCommodities[type]) {
-                alert("Not enough commodity to sell");
+                alert("Invalid amount or not enough commodities to sell.");
                 return;
             }
             ownedCommodities[type] -= amount / commodityPrices[type];
             balance += amount;
-            document.getElementById(`owned${type}`).textContent = `${type.charAt(0).toUpperCase() + type.slice(1)} Owned: ` + ownedCommodities[type].toFixed(2) + " units";
+            localStorage.setItem("balance", balance);
+            document.getElementById(`owned${type}`).textContent = `${type.charAt(0).toUpperCase() + type.slice(1)} Owned: ${ownedCommodities[type].toFixed(2)} units`;
+            updatePrices(); // Update balance display
+        }
+
+        window.onload = function() {
+            updatePrices(); // Initial price update on load
+            if (!localStorage.getItem("balance")) {
+                localStorage.setItem("balance", "30000000"); // Default balance if not set
+            }
         }
 
         setInterval(updatePrices, 5000);
@@ -83,7 +126,8 @@
 <body>
     <h1>Commodities Trading</h1>
     <h2>Balance: <span id="balance">30,000,000 Rands</span></h2>
-    
+
+    <!-- Commodity Sections -->
     <div class="commodity">
         <img src="gold.png" alt="Gold" class="icon" onclick="buyCommodity('gold')">
         <h2>Gold Price: <span id="goldPrice">$500</span></h2>
@@ -111,6 +155,5 @@
         <h3 id="owneddiamond">Diamond Owned: 0 units</h3>
         <button onclick="sellCommodity('diamond')">Sell Diamond</button>
     </div>
-    
 </body>
 </html>
