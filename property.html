@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Property 44</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    .property {
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+    }
+    .property img {
+      max-width: 100px;
+      height: auto;
+    }
+    .property button {
+      margin: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Property 44 Listings</h1>
+  <div id="properties"></div>
+
+  <script>
+    // Property data
+    const properties = [
+      { id: 1, name: "Property One", price: 1000000000, image: "1.png" },
+      { id: 2, name: "Property Two", price: 900000000, image: "2.png" },
+      { id: 3, name: "Property Three", price: 800000000, image: "3.png" },
+      { id: 4, name: "Property Four", price: 700000000, image: "4.png" },
+      { id: 5, name: "Property Five", price: 600000000, image: "5.png" },
+      { id: 6, name: "Property Six", price: 500000000, image: "6.png" },
+      { id: 7, name: "Property Seven", price: 400000000, image: "7.png" },
+      { id: 8, name: "Property Eight", price: 390000000, image: "8.png" },
+      { id: 9, name: "Property Nine", price: 385000000, image: "9.png" },
+      { id: 10, name: "Property Ten", price: 380000000, image: "10.png" }
+    ];
+
+    // Fetch balance from game.html
+    let balance = localStorage.getItem("balance") ? parseInt(localStorage.getItem("balance")) : 0;
+
+    // Load owned properties from localStorage
+    let ownedProperties = JSON.parse(localStorage.getItem("ownedProperties")) || {};
+
+    // Render properties
+    const propertiesContainer = document.getElementById("properties");
+    properties.forEach(property => {
+      const propertyDiv = document.createElement("div");
+      propertyDiv.className = "property";
+      propertyDiv.innerHTML = `
+        <img src="${property.image}" alt="${property.name}">
+        <h3>${property.name}</h3>
+        <p>Price: $${property.price.toLocaleString()}</p>
+        <input type="number" id="buy-${property.id}" placeholder="Quantity to buy" min="1">
+        <button onclick="buyProperty(${property.id})">Buy</button>
+        <input type="number" id="sell-${property.id}" placeholder="Quantity to sell" min="1">
+        <button onclick="sellProperty(${property.id})">Sell</button>
+      `;
+      propertiesContainer.appendChild(propertyDiv);
+    });
+
+    // Buy property function
+    function buyProperty(propertyId) {
+      const property = properties.find(p => p.id === propertyId);
+      const quantity = parseInt(document.getElementById(`buy-${propertyId}`).value);
+      if (!quantity || quantity < 1) {
+        alert("Please enter a valid quantity.");
+        return;
+      }
+      const totalCost = property.price * quantity;
+      if (balance < totalCost) {
+        alert("Insufficient balance.");
+        return;
+      }
+      balance -= totalCost;
+      ownedProperties[propertyId] = (ownedProperties[propertyId] || 0) + quantity;
+      localStorage.setItem("balance", balance);
+      localStorage.setItem("ownedProperties", JSON.stringify(ownedProperties));
+      alert(`Successfully bought ${quantity} ${property.name}(s).`);
+    }
+
+    // Sell property function
+    function sellProperty(propertyId) {
+      const property = properties.find(p => p.id === propertyId);
+      const quantity = parseInt(document.getElementById(`sell-${propertyId}`).value);
+      if (!quantity || quantity < 1) {
+        alert("Please enter a valid quantity.");
+        return;
+      }
+      if (!ownedProperties[propertyId] || ownedProperties[propertyId] < quantity) {
+        alert("You do not own enough of this property.");
+        return;
+      }
+      const totalValue = property.price * quantity;
+      balance += totalValue;
+      ownedProperties[propertyId] -= quantity;
+      if (ownedProperties[propertyId] === 0) {
+        delete ownedProperties[propertyId];
+      }
+      localStorage.setItem("balance", balance);
+      localStorage.setItem("ownedProperties", JSON.stringify(ownedProperties));
+      alert(`Successfully sold ${quantity} ${property.name}(s).`);
+    }
+
+    // Dividend calculation (1% per minute)
+    setInterval(() => {
+      let totalDividends = 0;
+      for (const [propertyId, quantity] of Object.entries(ownedProperties)) {
+        const property = properties.find(p => p.id === parseInt(propertyId));
+        totalDividends += (property.price * 0.01) * quantity;
+      }
+      balance += totalDividends;
+      localStorage.setItem("balance", balance);
+      console.log(`Dividends added: $${totalDividends.toLocaleString()}`);
+    }, 60000); // 1 minute interval
+  </script>
+</body>
+</html>
