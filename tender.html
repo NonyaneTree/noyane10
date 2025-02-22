@@ -5,58 +5,58 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tenders</title>
     <script>
+        let tenders = [
+            { name: "Tshwane EPWP", payout: 9000000, requirements: 3000000 },
+            { name: "Capetown EPWP", payout: 12000000, requirements: 4000000 },
+            { name: "Tshwane Department of Housing", payout: 200000000000, requirements: 50000000000 },
+            { name: "Johannesburg Department of Housing", payout: 10000000, requirements: 3000000 }
+        ];
+
+        function loadBalance() {
+            return parseInt(localStorage.getItem("balance")) || 500000000000; // Default balance
+        }
+
+        function updateBalance(newBalance) {
+            localStorage.setItem("balance", newBalance);
+            document.getElementById("balance").innerText = `Balance: R ${newBalance.toLocaleString()}`;
+        }
+
+        function updateGameBalance(amount) {
+            localStorage.setItem("game_balance", amount);
+        }
+
+        function canBid(index) {
+            return !localStorage.getItem(`bid_${index}`);
+        }
+
+        function placeBid(index) {
+            let tender = tenders[index];
+            let balance = loadBalance();
+
+            if (!canBid(index)) {
+                alert("You have already bid on this tender!");
+                return;
+            }
+
+            if (balance < tender.requirements) {
+                alert("Insufficient funds to bid on this tender.");
+                return;
+            }
+
+            balance -= tender.requirements;
+            updateBalance(balance);
+            localStorage.setItem(`bid_${index}`, "true");
+            alert(`Bid placed on ${tender.name}. Payout will be processed in 4 hours.`);
+
+            setTimeout(() => {
+                let newBalance = loadBalance() + tender.payout;
+                updateBalance(newBalance);
+                updateGameBalance(newBalance);
+                alert(`Payout of R ${tender.payout.toLocaleString()} received for ${tender.name}!`);
+            }, 4 * 60 * 60 * 1000); // 4 hours delay
+        }
+
         document.addEventListener("DOMContentLoaded", function () {
-            let tenders = [
-                { name: "Tshwane EPWP", payout: 9000000, requirements: 3000000 },
-                { name: "Capetown EPWP", payout: 12000000, requirements: 4000000 },
-                { name: "Tshwane Department of Housing", payout: 200000000000, requirements: 50000000000 },
-                { name: "Johannesburg Department of Housing", payout: 10000000, requirements: 3000000 }
-            ];
-
-            function loadBalance() {
-                return parseInt(localStorage.getItem("balance")) || 500000000000; // Default balance
-            }
-
-            function updateBalance(newBalance) {
-                localStorage.setItem("balance", newBalance);
-                document.getElementById("balance").innerText = `Balance: R ${newBalance.toLocaleString()}`;
-            }
-
-            function updateGameBalance(amount) {
-                localStorage.setItem("game_balance", amount);
-            }
-
-            function canBid(index) {
-                return !localStorage.getItem(`bid_${index}`);
-            }
-
-            function placeBid(index) {
-                let tender = tenders[index];
-                let balance = loadBalance();
-
-                if (!canBid(index)) {
-                    alert("You have already bid on this tender!");
-                    return;
-                }
-
-                if (balance < tender.requirements) {
-                    alert("Insufficient funds to bid on this tender.");
-                    return;
-                }
-
-                balance -= tender.requirements;
-                updateBalance(balance);
-                localStorage.setItem(`bid_${index}`, "true");
-                alert(`Bid placed on ${tender.name}. Payout will be processed in 4 hours.`);
-
-                setTimeout(() => {
-                    let newBalance = loadBalance() + tender.payout;
-                    updateBalance(newBalance);
-                    updateGameBalance(newBalance);
-                    alert(`Payout of R ${tender.payout.toLocaleString()} received for ${tender.name}!`);
-                }, 4 * 60 * 60 * 1000); // 4 hours delay
-            }
-
             document.getElementById("balance").innerText = `Balance: R ${loadBalance().toLocaleString()}`;
             
             let tenderList = document.getElementById("tenderList");
