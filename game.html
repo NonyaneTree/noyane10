@@ -1,13 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Finance Dashboard</title>
     <style>
         body {
-            background-color: blue;
-            color: white;
+            background-color: white;
+            color: black;
             text-align: center;
             font-family: Arial, sans-serif;
             margin: 0;
@@ -25,54 +24,68 @@
             margin: 20px;
             cursor: pointer;
         }
-        h1, h2 {
+        h1 {
+            margin: 5px 0;
+        }
+        h2 {
             margin: 10px 0;
+        }
+        .top-section {
+            margin-bottom: 20px;
+        }
+        .button {
+            padding: 10px 20px;
+            background-color: blue;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 10px;
         }
     </style>
     <script>
-        // Initialize balance from localStorage or set to a default value
-        let balance = parseFloat(localStorage.getItem("balance")) || 30000000;
+        let balance = parseFloat(localStorage.getItem("balance")) || 30000000;function updateBalance(amount) {
+        balance += amount;
+        localStorage.setItem("balance", balance);
+        document.getElementById("balance").textContent = "Balance: " + balance.toLocaleString() + " Rands";
+        updateNetWorth();
+    }
 
-        function updateBalance(amount) {
-            balance += amount;
-            localStorage.setItem("balance", balance); // Save updated balance
-            document.getElementById("balance").textContent = "Balance: " + balance.toLocaleString() + " Rands";
-            updateNetWorth(); // Update net worth whenever balance changes
-        }
+    function updateNetWorth() {
+        const forexMoney = parseFloat(localStorage.getItem("forexBalance")) || 0;
+        const stockMoney = parseFloat(localStorage.getItem("stockBalance")) || 0;
+        const commoditiesMoney = parseFloat(localStorage.getItem("commoditiesBalance")) || 0;
 
-        function updateNetWorth() {
-            const forexMoney = parseFloat(localStorage.getItem("forexBalance")) || 0;
-            const stockMoney = parseFloat(localStorage.getItem("stockBalance")) || 0;
-            const commoditiesMoney = parseFloat(localStorage.getItem("commoditiesBalance")) || 0;
+        const netWorth = balance + forexMoney + stockMoney + commoditiesMoney;
+        document.getElementById("netWorth").textContent = "Net Worth: " + netWorth.toLocaleString() + " Rands";
+    }
 
-            const netWorth = balance + forexMoney + stockMoney + commoditiesMoney;
-            document.getElementById("netWorth").textContent = "Net Worth: " + netWorth.toLocaleString() + " Rands";
-        }
+    window.onload = function() {
+        document.getElementById("balance").textContent = "Balance: " + balance.toLocaleString() + " Rands";
+        updateNetWorth();
+    };
+</script>
 
-        // Initial balance and net worth display
-        window.onload = function() {
-            document.getElementById("balance").textContent = "Balance: " + balance.toLocaleString() + " Rands";
-            updateNetWorth(); // Calculate initial net worth
-        };
-    </script>
 </head>
 <body>
-    <h1 id="balance">Balance: 30,000,000 Rands</h1>
-    <h2 id="netWorth">Net Worth: 0 Rands</h2>
-    
-    <div>
-        <img src="commodities.png" alt="Commodities" class="icon" onclick="window.location.href='commodities.html'">
-        <h2>Commodities</h2>
-    </div>
-    
-    <div>
-        <img src="forex.png" alt="Forex" class="icon" onclick="window.location.href='forex.html'">
-        <h2>Forex</h2>
-    </div>
-    
-    <div>
-        <img src="stock.png" alt="Stock" class="icon" onclick="window.location.href='stock.html'">
-        <h2>Stock</h2>
-    </div>
+    <div class="top-section">
+        <h1 id="balance">Balance: 30,000,000 Rands</h1>
+        <h2 id="netWorth">Net Worth: 0 Rands</h2>
+    </div><button class="button" onclick="window.location.href='tender.html'">Go to Tenders</button>
+
+<div>
+    <img src="commodities.png" alt="Commodities" class="icon" onclick="window.location.href='commodities.html'">
+    <h2>Commodities</h2>
+</div>
+
+<div>
+    <img src="forex.png" alt="Forex" class="icon" onclick="window.location.href='forex.html'">
+    <h2>Forex</h2>
+</div>
+
+<div>
+    <img src="stock.png" alt="Stock" class="icon" onclick="window.location.href='stock.html'">
+    <h2>Stock</h2>
+</div>
+
 </body>
 </html>
