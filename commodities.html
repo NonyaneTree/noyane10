@@ -1,0 +1,116 @@
+<!DOCTYPE html><html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Commodities Trading</title>
+    <style>
+        body {
+            background-color: blue;
+            color: white;
+            text-align: center;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .commodity {
+            margin: 20px;
+        }
+        .icon {
+            width: 100px;
+            height: auto;
+            cursor: pointer;
+        }
+    </style>
+    <script>
+        let balance = 30000000;
+        let commodityPrices = {
+            gold: Math.floor(Math.random() * (4000 - 500 + 1)) + 500,
+            silver: Math.floor(Math.random() * (1000 - 50 + 1)) + 50,
+            bronze: Math.floor(Math.random() * (500 - 50 + 1)) + 50,
+            diamond: Math.floor(Math.random() * (10000 - 5000 + 1)) + 5000,
+            platinum: Math.floor(Math.random() * (8000 - 2000 + 1)) + 2000,
+            salt: Math.floor(Math.random() * (200 - 20 + 1)) + 20,
+            sand: Math.floor(Math.random() * (100 - 10 + 1)) + 10,
+            ember: Math.floor(Math.random() * (600 - 100 + 1)) + 100,
+            coal: Math.floor(Math.random() * (300 - 50 + 1)) + 50
+        };
+        let ownedCommodities = {
+            gold: 0,
+            silver: 0,
+            bronze: 0,
+            diamond: 0,
+            platinum: 0,
+            salt: 0,
+            sand: 0,
+            ember: 0,
+            coal: 0
+        };
+
+        function updatePrices() {
+            for (let key in commodityPrices) {
+                commodityPrices[key] = Math.floor(Math.random() * (commodityPrices[key] * 1.2 - commodityPrices[key] * 0.8 + 1)) + commodityPrices[key] * 0.8;
+                document.getElementById(`${key}Price`).textContent = "$" + commodityPrices[key].toFixed(2);
+            }
+        }
+
+        function buyCommodity(type) {
+            let amount = prompt("Enter amount to buy in USD:");
+            amount = parseFloat(amount);
+            if (isNaN(amount) || amount <= 0 || amount > balance) {
+                alert("Invalid amount");
+                return;
+            }
+            ownedCommodities[type] += amount / commodityPrices[type];
+            balance -= amount;
+            document.getElementById(`owned${type}`).textContent = `${type.charAt(0).toUpperCase() + type.slice(1)} Owned: ` + ownedCommodities[type].toFixed(2) + " units";
+        }
+
+        function sellCommodity(type) {
+            let amount = prompt("Enter amount to sell in USD:");
+            amount = parseFloat(amount);
+            if (isNaN(amount) || amount <= 0 || amount / commodityPrices[type] > ownedCommodities[type]) {
+                alert("Not enough commodity to sell");
+                return;
+            }
+            ownedCommodities[type] -= amount / commodityPrices[type];
+            balance += amount;
+            document.getElementById(`owned${type}`).textContent = `${type.charAt(0).toUpperCase() + type.slice(1)} Owned: ` + ownedCommodities[type].toFixed(2) + " units";
+        }
+
+        setInterval(updatePrices, 5000);
+    </script>
+</head>
+<body>
+    <h1>Commodities Trading</h1>
+    <h2>Balance: <span id="balance">30,000,000 Rands</span></h2>
+    
+    <div class="commodity">
+        <img src="gold.png" alt="Gold" class="icon" onclick="buyCommodity('gold')">
+        <h2>Gold Price: <span id="goldPrice">$500</span></h2>
+        <h3 id="ownedgold">Gold Owned: 0 oz</h3>
+        <button onclick="sellCommodity('gold')">Sell Gold</button>
+    </div>
+
+    <div class="commodity">
+        <img src="silver.png" alt="Silver" class="icon" onclick="buyCommodity('silver')">
+        <h2>Silver Price: <span id="silverPrice">$50</span></h2>
+        <h3 id="ownedsilver">Silver Owned: 0 oz</h3>
+        <button onclick="sellCommodity('silver')">Sell Silver</button>
+    </div>
+
+    <div class="commodity">
+        <img src="bronze.png" alt="Bronze" class="icon" onclick="buyCommodity('bronze')">
+        <h2>Bronze Price: <span id="bronzePrice">$50</span></h2>
+        <h3 id="ownedbronze">Bronze Owned: 0 units</h3>
+        <button onclick="sellCommodity('bronze')">Sell Bronze</button>
+    </div>
+
+    <div class="commodity">
+        <img src="diamond.png" alt="Diamond" class="icon" onclick="buyCommodity('diamond')">
+        <h2>Diamond Price: <span id="diamondPrice">$5000</span></h2>
+        <h3 id="owneddiamond">Diamond Owned: 0 units</h3>
+        <button onclick="sellCommodity('diamond')">Sell Diamond</button>
+    </div>
+    
+</body>
+</html>
