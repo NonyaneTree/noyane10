@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Dashboard</title>
+    <style>
+        body {
+            background-color: blue;
+            color: white;
+            text-align: center;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .icon {
+            display: block;
+            width: 100px;
+            height: auto;
+            margin: 20px;
+            cursor: pointer;
+        }
+        h1, h2 {
+            margin: 10px 0;
+        }
+    </style>
+    <script>
+        let balance = 30000000;
+        function updateBalance(amount) {
+            balance += amount;
+            document.getElementById("balance").textContent = "Balance: " + balance.toLocaleString() + " Rands";
+        }
+    </script>
+</head>
+<body>
+    <h1 id="balance">Balance: 30,000,000 Rands</h1>
+    
+    <div>
+        <img src="commodities.png" alt="Commodities" class="icon" onclick="window.location.href='commodities.html'">
+        <h2>Commodities</h2>
+    </div>
+    
+    <div>
+        <img src="forex.png" alt="Forex" class="icon" onclick="window.location.href='forex.html'">
+        <h2>Forex</h2>
+    </div>
+    
+    <div>
+        <img src="stock.png" alt="Stock" class="icon" onclick="window.location.href='stock.html'">
+        <h2>Stock</h2>
+    </div>
+</body>
+</html>
