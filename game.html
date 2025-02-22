@@ -30,15 +30,35 @@
         }
     </style>
     <script>
-        let balance = 30000000;
+        // Initialize balance from localStorage or set to a default value
+        let balance = parseFloat(localStorage.getItem("balance")) || 30000000;
+
         function updateBalance(amount) {
             balance += amount;
+            localStorage.setItem("balance", balance); // Save updated balance
             document.getElementById("balance").textContent = "Balance: " + balance.toLocaleString() + " Rands";
+            updateNetWorth(); // Update net worth whenever balance changes
         }
+
+        function updateNetWorth() {
+            const forexMoney = parseFloat(localStorage.getItem("forexBalance")) || 0;
+            const stockMoney = parseFloat(localStorage.getItem("stockBalance")) || 0;
+            const commoditiesMoney = parseFloat(localStorage.getItem("commoditiesBalance")) || 0;
+
+            const netWorth = balance + forexMoney + stockMoney + commoditiesMoney;
+            document.getElementById("netWorth").textContent = "Net Worth: " + netWorth.toLocaleString() + " Rands";
+        }
+
+        // Initial balance and net worth display
+        window.onload = function() {
+            document.getElementById("balance").textContent = "Balance: " + balance.toLocaleString() + " Rands";
+            updateNetWorth(); // Calculate initial net worth
+        };
     </script>
 </head>
 <body>
     <h1 id="balance">Balance: 30,000,000 Rands</h1>
+    <h2 id="netWorth">Net Worth: 0 Rands</h2>
     
     <div>
         <img src="commodities.png" alt="Commodities" class="icon" onclick="window.location.href='commodities.html'">
