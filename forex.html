@@ -43,10 +43,19 @@
             gap: 20px;
             margin-top: 20px;
         }
-        .trade-panel input {
+        .trade-panel input, .trade-panel select {
             padding: 10px;
             font-size: 16px;
-            width: 100px;
+            width: 120px;
+        }
+        .trade-history {
+            margin-top: 20px;
+            text-align: left;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #444;
+            padding: 10px;
+            background-color: #2d2d44;
         }
     </style>
 </head>
@@ -70,13 +79,19 @@
             <button onclick="withdrawFunds()">Withdraw</button>
         </div>
         <canvas id="forexChart" width="800" height="400"></canvas>
+        <div class="trade-history">
+            <h3>Trade History</h3>
+            <ul id="tradeHistory"></ul>
+        </div>
     </div>
 
     <script>
-        // Fetch initial balance from localStorage
+        // Fetch initial balance and trade history from localStorage
         let balance = parseFloat(localStorage.getItem("balance")) || 30000000; // Starting balance in Rands
+        let tradeHistory = JSON.parse(localStorage.getItem("tradeHistory")) || [];
         document.getElementById('balance').textContent = balance.toLocaleString() + ' Rands';
 
+        // Initialize Chart Data
         let chartData = {
             labels: [], // Time labels
             datasets: [{
@@ -179,6 +194,21 @@
                 balance += profitLoss;
                 localStorage.setItem("balance", balance); // Update balance in localStorage
                 updateBalance();
+
+                // Log Trade History
+                const tradeLog = {
+                    pair: pair,
+                    type: type,
+                    lotSize: lotSize,
+                    amount: tradeAmount,
+                    outcome: outcome,
+                    profitLoss: profitLoss,
+                    timestamp: new Date().toLocaleString()
+                };
+                tradeHistory.push(tradeLog);
+                localStorage.setItem("tradeHistory", JSON.stringify(tradeHistory)); // Save trade history
+                updateTradeHistory();
+
                 alert(`Trade ${outcome}! ${profitLoss.toFixed(2)} Rands ${outcome === 'win' ? 'gained' : 'lost'}.`);
             }, 5000); // Simulate 5-second trade
         }
@@ -210,6 +240,21 @@
         function updateBalance() {
             document.getElementById('balance').innerText = balance.toLocaleString() + ' Rands';
         }
+
+        // Update Trade History Display
+        function updateTradeHistory() {
+            const tradeHistoryElement = document.getElementById('tradeHistory');
+            tradeHistoryElement.innerHTML = tradeHistory.map(trade => `
+                <li>
+                    <strong>${trade.timestamp}</strong> - 
+                    ${trade.type.toUpperCase()} ${trade.pair} (Lot Size: ${trade.lotSize}) - 
+                    ${trade.outcome === 'win' ? 'Won' : 'Lost'} ${Math.abs(trade.profitLoss).toFixed(2)} Rands
+                </li>
+            `).join('');
+        }
+
+        // Load Trade History on Page Load
+        updateTradeHistory();
     </script>
 </body>
 </html>
