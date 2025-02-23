@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Franchise Tracker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    .franchise-item {
+      padding: 10px;
+      margin: 5px;
+      border: 1px solid #ccc;
+      display: flex;
+      align-items: center;
+      background-color: #f9f9f9;
+      width: 100%;
+      text-align: left;
+    }
+    .franchise-item img {
+      width: 50px;
+      height: 50px;
+      margin-right: 10px;
+      border-radius: 5px;
+    }
+    .franchise-item button {
+      border: none;
+      background: none;
+      font-size: 16px;
+      cursor: pointer;
+      padding: 0;
+      margin: 0;
+      text-align: left;
+      flex-grow: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .franchise-item button span {
+      margin-right: 10px;
+    }
+    .buy-button, .sell-button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+    .sell-button {
+      background-color: #f44336;
+    }
+    .quantity-input {
+      width: 50px;
+      padding: 5px;
+      margin-left: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Franchise Tracker</h1>
+  <div id="franchise-list">
+    <!-- Franchise items will be dynamically added here -->
+  </div>
+
+  <script>
+    // List of franchises with their prices and image file names
+    const franchises = [
+      { name: "CKF", price: 10000000, image: "cfk.png" },
+      { name: "Barber Legends", price: 1200000, image: "legends.png" },
+      { name: "Bakes by Roro", price: 1100000, image: "bakesbyroro.png" },
+      { name: "Pizza Debonairs", price: 2800000, image: "debonairs.png" },
+      { name: "Nando'se", price: 6940000, image: "nandos.png" },
+      { name: "Engine2", price: 9890000, image: "engine.png" },
+      { name: "Sasolo", price: 10000000, image: "sasol.png" },
+      { name: "PaynPick", price: 13000000, image: "picknpay.png" },
+    ];
+
+    // Function to get the user's balance from localStorage
+    function getBalance() {
+      return parseInt(localStorage.getItem("balance")) || 0;
+    }
+
+    // Function to update the user's balance in localStorage
+    function updateBalance(amount) {
+      const balance = getBalance();
+      localStorage.setItem("balance", balance + amount);
+    }
+
+    // Function to get the number of franchises owned
+    function getFranchiseCount(franchiseName) {
+      const storedData = localStorage.getItem(franchiseName);
+      return storedData ? JSON.parse(storedData).count : 0;
+    }
+
+    // Function to update the number of franchises owned
+    function updateFranchiseCount(franchiseName, count) {
+      const data = { count: count };
+      localStorage.setItem(franchiseName, JSON.stringify(data));
+    }
+
+    // Function to calculate dividends (1% of franchise price per minute per franchise)
+    function calculateDividends() {
+      franchises.forEach((franchise) => {
+        const count = getFranchiseCount(franchise.name);
+        if (count > 0) {
+          const dividend = (franchise.price * 0.01) * count;
+          updateBalance(dividend);
+        }
+      });
+    }
+
+    // Calculate dividends every minute
+    setInterval(calculateDividends, 60000); // 60,000ms = 1 minute
+
+    // Function to create franchise items
+    function createFranchiseItems() {
+      const franchiseList = document.getElementById("franchise-list");
+
+      franchises.forEach((franchise) => {
+        const count = getFranchiseCount(franchise.name);
+
+        const franchiseItem = document.createElement("div");
+        franchiseItem.className = "franchise-item";
+
+        // Create an image element for the franchise
+        const franchiseImage = document.createElement("img");
+        franchiseImage.src = franchise.image;
+        franchiseImage.alt = `${franchise.name} logo`;
+
+        // Create a button for the franchise name
+        const franchiseButton = document.createElement("button");
+        franchiseButton.innerHTML = `
+          <span>${franchise.name}</span>
+          <span>Price: $${franchise.price.toLocaleString()}</span>
+          <span>Owned: ${count}</span>
+        `;
+
+        // Create a quantity input for buying
+        const buyQuantityInput = document.createElement("input");
+        buyQuantityInput.type = "number";
+        buyQuantityInput.className = "quantity-input";
+        buyQuantityInput.min = 1;
+        buyQuantityInput.value = 1;
+
+        // Create a "Buy" button
+        const buyButton = document.createElement("button");
+        buyButton.className = "buy-button";
+        buyButton.textContent = "Buy";
+
+        // Handle buying the franchise
+        buyButton.addEventListener("click", () => {
+          const quantity = parseInt(buyQuantityInput.value);
+          const totalCost = franchise.price * quantity;
+
+          if (getBalance() >= totalCost) {
+            updateBalance(-totalCost); // Deduct the cost from the balance
+            updateFranchiseCount(franchise.name, count + quantity); // Update the count
+            franchiseButton.innerHTML = `
+              <span>${franchise.name}</span>
+              <span>Price: $${franchise.price.toLocaleString()}</span>
+              <span>Owned: ${count + quantity}</span>
+            `;
+            alert(`You have successfully bought ${quantity} ${franchise.name} franchise(s)!`);
+          } else {
+            alert("Insufficient balance!");
+          }
+        });
+
+        // Create a quantity input for selling
+        const sellQuantityInput = document.createElement("input");
+        sellQuantityInput.type = "number";
+        sellQuantityInput.className = "quantity-input";
+        sellQuantityInput.min = 1;
+        sellQuantityInput.value = 1;
+
+        // Create a "Sell" button
+        const sellButton = document.createElement("button");
+        sellButton.className = "sell-button";
+        sellButton.textContent = "Sell";
+
+        // Handle selling the franchise
+        sellButton.addEventListener("click", () => {
+          const quantity = parseInt(sellQuantityInput.value);
+          if (quantity > count) {
+            alert("You don't own enough franchises to sell!");
+          } else {
+            const totalEarnings = franchise.price * quantity;
+            updateBalance(totalEarnings); // Add earnings to the balance
+            updateFranchiseCount(franchise.name, count - quantity); // Update the count
+            franchiseButton.innerHTML = `
+              <span>${franchise.name}</span>
+              <span>Price: $${franchise.price.toLocaleString()}</span>
+              <span>Owned: ${count - quantity}</span>
+            `;
+            alert(`You have successfully sold ${quantity} ${franchise.name} franchise(s)!`);
+          }
+        });
+
+        // Append elements to the franchise item
+        franchiseItem.appendChild(franchiseImage);
+        franchiseItem.appendChild(franchiseButton);
+        franchiseItem.appendChild(buyQuantityInput);
+        franchiseItem.appendChild(buyButton);
+        franchiseItem.appendChild(sellQuantityInput);
+        franchiseItem.appendChild(sellButton);
+        franchiseList.appendChild(franchiseItem);
+      });
+    }
+
+    // Initialize the page
+    createFranchiseItems();
+  </script>
+</body>
+</html>
