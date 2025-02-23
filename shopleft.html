@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EquityEasy</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 400px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        .price, .order-section, .ownership {
+            margin: 20px 0;
+        }
+        button {
+            background-color: red;
+            color: white;
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+            margin: 5px;
+        }
+        #myChart {
+            max-width: 400px;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>EquityEasy - PEPKROR</h2>
+        <div class="price">
+            <h3>Stock Price: R<span id="stockPrice">1000</span></h3>
+        </div>
+        <div class="ownership">
+            <h3>Shares Owned: <span id="sharesOwned">0</span></h3>
+            <h3>Percentage Owned: <span id="percentageOwned">0</span>%</h3>
+            <h3>Profit: R<span id="profit">0</span></h3>
+        </div>
+        <div class="order-section">
+            <input type="number" id="investmentAmount" placeholder="Enter Amount">
+            <button onclick="buyStock()">Buy</button>
+            <button onclick="sellStock()">Sell</button>
+        </div>
+        <canvas id="myChart"></canvas>
+    </div>
+    <script>
+        let stockPrice = 1000;
+        let sharesOwned = 0;
+        const maxShares = 1000000000; // Maximum shares available
+        const priceHistory = [];
+
+        const ctx = document.getElementById('myChart').getContext('2d');
+        const myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Stock Price',
+                    data: [],
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        function updatePrice() {
+            let change = (Math.random() < 0.5 ? -10 : 10);
+            stockPrice = Math.max(100, Math.min(1200, stockPrice + change));
+            document.getElementById('stockPrice').innerText = stockPrice;
+
+            // Update chart
+            if (priceHistory.length > 10) {
+                priceHistory.shift(); // Keep last 10 prices
+                myChart.data.labels.shift();
+            }
+            priceHistory.push(stockPrice);
+            myChart.data.labels.push(new Date().toLocaleTimeString());
+            myChart.data.datasets[0].data = priceHistory;
+            myChart.update();
+
+            updateProfit();
+        }
+        setInterval(updatePrice, 10000);
+
+        function updateProfit() {
+            const totalInvestment = sharesOwned * stockPrice;
+            const profit = totalInvestment; // Assuming profit is total value of owned shares
+            document.getElementById('profit').innerText = profit.toFixed(2);
+        }
+
+        function buyStock() {
+            let amount = parseFloat(document.getElementById('investmentAmount').value);
+            if (amount <= 0) {
+                alert("Invalid amount");
+                return;
+            }
+
+            // Simulate fetching balance from game.html
+            let balance = 1000; // Replace with actual balance fetching logic
+
+            if (amount > balance) {
+                alert("Insufficient balance");
+                return;
+            }
+
+            let sharesToBuy = Math.floor(amount / stockPrice);
+            if (sharesToBuy + sharesOwned > maxShares) {
+                alert("Cannot buy more than available shares");
+                return;
+            }
+
+            // Update balance in game.html (Simulated here)
+            balance -= sharesToBuy * stockPrice;
+
+            sharesOwned += sharesToBuy;
+            document.getElementById('sharesOwned').innerText = sharesOwned;
+            document.getElementById('percentageOwned').innerText = ((sharesOwned / maxShares) * 100).toFixed(6);
+            alert("Stock bought!");
+        }
+
+        function sellStock() {
+            let amount = parseFloat(document.getElementById('investmentAmount').value);
+            let sharesToSell = Math.floor(amount / stockPrice);
+            if (sharesToSell > sharesOwned || sharesToSell <= 0) {
+                alert("Insufficient shares to sell or invalid amount");
+                return;
+            }
+
+            // Update balance in game.html (Simulated here)
+            let balance = 1000; // Replace with actual balance fetching logic
+            balance += sharesToSell * stockPrice;
+
+            sharesOwned -= sharesToSell;
+            document.getElementById('sharesOwned').innerText = sharesOwned;
+            document.getElementById('percentageOwned').innerText = ((sharesOwned / maxShares) * 100).toFixed(6);
+            alert("Stock sold!");
+        }
+    </script>
+</body>
+</html>
