@@ -6,8 +6,8 @@
     <title>Finance Dashboard</title>
     <style>
         body {
-            background-color: white;
-            color: black;
+            background-color: #f4f4f9;
+            color: #333;
             text-align: center;
             font-family: Arial, sans-serif;
             margin: 0;
@@ -16,39 +16,88 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-        }
-        .icon {
-            display: block;
-            width: 100px;
-            height: auto;
-            margin: 20px;
-            cursor: pointer;
-        }
-        h1 {
-            margin: 5px 0;
-        }
-        h2 {
-            margin: 10px 0;
+            min-height: 100vh;
         }
         .top-section {
             margin-bottom: 20px;
         }
-        .button {
-            padding: 10px 20px;
-            background-color: blue;
-            color: white;
-            border: none;
-            cursor: pointer;
-            margin-top: 10px;
+        .top-section h1 {
+            font-size: 24px;
+            margin: 5px 0;
+            color: #2c3e50;
+        }
+        .top-section h2 {
+            font-size: 18px;
+            margin: 10px 0;
+            color: #34495e;
         }
         .button-group {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .button {
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+        .button:hover {
+            background-color: #2980b9;
+        }
+        .icon {
+            width: 80px;
+            height: auto;
             margin: 10px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        .icon:hover {
+            transform: scale(1.1);
+        }
+        .icon-section {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .icon-section div {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .icon-section h2 {
+            font-size: 16px;
+            margin: 5px 0;
+            color: #2c3e50;
         }
     </style>
     <script>
         let balance = parseFloat(localStorage.getItem("balance")) || 30000000;
-        
+
+        // Function to fetch data from other pages
+        async function fetchData(page) {
+            try {
+                const response = await fetch(page);
+                const text = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(text, "text/html");
+                const value = doc.querySelector(".value")?.textContent || "0";
+                return parseFloat(value.replace(/,/g, "")) || 0;
+            } catch (error) {
+                console.error(`Error fetching data from ${page}:`, error);
+                return 0;
+            }
+        }
+
+        // Function to update balance
         function updateBalance(amount) {
             balance += amount;
             localStorage.setItem("balance", balance);
@@ -56,12 +105,18 @@
             updateNetWorth();
         }
 
-        function updateNetWorth() {
+        // Function to update net worth
+        async function updateNetWorth() {
             const forexMoney = parseFloat(localStorage.getItem("forexBalance")) || 0;
             const stockMoney = parseFloat(localStorage.getItem("stockBalance")) || 0;
             const commoditiesMoney = parseFloat(localStorage.getItem("commoditiesBalance")) || 0;
 
-            const netWorth = balance + forexMoney + stockMoney + commoditiesMoney;
+            // Fetch data from property.html, franchise.html, and transport.html
+            const propertyValue = await fetchData("property.html");
+            const franchiseValue = await fetchData("franchise.html");
+            const transportValue = await fetchData("transport.html");
+
+            const netWorth = balance + forexMoney + stockMoney + commoditiesMoney + propertyValue + franchiseValue + transportValue;
             document.getElementById("netWorth").textContent = "Net Worth: " + netWorth.toLocaleString() + " Rands";
         }
 
@@ -80,18 +135,21 @@
         <button class="button" onclick="window.location.href='tender.html'">Go to Tenders</button>
         <button class="button" onclick="window.location.href='property.html'">Go to Property</button>
         <button class="button" onclick="window.location.href='transport.html'">Go to Transport</button>
+        <button class="button" onclick="window.location.href='franchise.html'">Go to Franchises</button>
     </div>
-    <div>
-        <img src="commodities.png" alt="Commodities" class="icon" onclick="window.location.href='commodities.html'">
-        <h2>Commodities</h2>
-    </div>
-    <div>
-        <img src="forex.png" alt="Forex" class="icon" onclick="window.location.href='forex.html'">
-        <h2>Forex</h2>
-    </div>
-    <div>
-        <img src="stock.png" alt="Stock" class="icon" onclick="window.location.href='stock.html'">
-        <h2>Stock</h2>
+    <div class="icon-section">
+        <div>
+            <img src="commodities.png" alt="Commodities" class="icon" onclick="window.location.href='commodities.html'">
+            <h2>Commodities</h2>
+        </div>
+        <div>
+            <img src="forex.png" alt="Forex" class="icon" onclick="window.location.href='forex.html'">
+            <h2>Forex</h2>
+        </div>
+        <div>
+            <img src="stock.png" alt="Stock" class="icon" onclick="window.location.href='stock.html'">
+            <h2>Stock</h2>
+        </div>
     </div>
 </body>
 </html>
