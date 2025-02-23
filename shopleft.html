@@ -59,6 +59,8 @@
         let sharesOwned = 0;
         const maxShares = 1000000000; // Maximum shares available
         const priceHistory = [];
+        let gameBalance = 1000; // Simulated balance in game.html
+        let totalDividends = 0; // Track total dividends received
 
         const ctx = document.getElementById('myChart').getContext('2d');
         const myChart = new Chart(ctx, {
@@ -103,7 +105,7 @@
 
         function updateProfit() {
             const totalInvestment = sharesOwned * stockPrice;
-            const profit = totalInvestment; // Assuming profit is total value of owned shares
+            const profit = totalInvestment + totalDividends; // Adjusted profit calculation
             document.getElementById('profit').innerText = profit.toFixed(2);
         }
 
@@ -114,10 +116,7 @@
                 return;
             }
 
-            // Simulate fetching balance from game.html
-            let balance = 1000; // Replace with actual balance fetching logic
-
-            if (amount > balance) {
+            if (amount > gameBalance) {
                 alert("Insufficient balance");
                 return;
             }
@@ -128,13 +127,17 @@
                 return;
             }
 
-            // Update balance in game.html (Simulated here)
-            balance -= sharesToBuy * stockPrice;
+            // Update balance in game.html
+            gameBalance -= sharesToBuy * stockPrice;
 
             sharesOwned += sharesToBuy;
             document.getElementById('sharesOwned').innerText = sharesOwned;
             document.getElementById('percentageOwned').innerText = ((sharesOwned / maxShares) * 100).toFixed(6);
-            alert("Stock bought!");
+            let dividends = amount * 0.01; // Calculate 1% dividend
+            gameBalance += dividends; // Add dividends to game balance
+            totalDividends += dividends; // Track total dividends
+            alert("Stock bought! Dividends added to game balance: R" + dividends.toFixed(2));
+            updateProfit(); // Update profit after buying
         }
 
         function sellStock() {
@@ -145,14 +148,14 @@
                 return;
             }
 
-            // Update balance in game.html (Simulated here)
-            let balance = 1000; // Replace with actual balance fetching logic
-            balance += sharesToSell * stockPrice;
+            // Update balance in game.html
+            gameBalance += sharesToSell * stockPrice;
 
             sharesOwned -= sharesToSell;
             document.getElementById('sharesOwned').innerText = sharesOwned;
             document.getElementById('percentageOwned').innerText = ((sharesOwned / maxShares) * 100).toFixed(6);
             alert("Stock sold!");
+            updateProfit(); // Update profit after selling
         }
     </script>
 </body>
