@@ -1,229 +1,92 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock Trading</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation"></script>
-    <style>
-        body {
-            background-color: #1e1e2f;
-            color: white;
-            font-family: Arial, sans-serif;
-            text-align: center;
-        }
-        canvas {
-            background-color: #2d2d44;
-            margin: 20px auto;
-            display: block;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        button {
-            margin: 10px;
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-        }
-        .balance {
-            font-size: 24px;
-            margin-bottom: 20px;
-        }
-        .trade-panel {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-top: 20px;
-        }
-        .trade-panel input {
-            padding: 10px;
-            font-size: 16px;
-            width: 100px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stock Tracker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    .stock-item {
+      padding: 10px;
+      margin: 5px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .stock-item:hover {
+      background-color: #f0f0f0;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Stock Trading</h1>
-        <div class="balance">
-            Balance: <span id="balance">30,000,000 Rands</span>
-        </div>
-        <div class="trade-panel">
-            <select id="stock">
-                <option value="FNB">FNB</option>
-                <option value="ABSA">ABSA</option>
-                <option value="Delta">Delta Property Funds</option>
-                <option value="Capitec">Capitec</option>
-                <option value="RMB">RMB</option>
-                <option value="Nespers">Nespers</option>
-                <option value="ARM">ARM</option>
-                <option value="Glencore">Glencore</option>
-                <option value="Mrprice">Mr Price</option>
-                <option value="Woolies">Woolworths</option>
-                <option value="Picknpay">Pick n Pay</option>
-                <option value="Shoprite">Shoprite</option>
-                <option value="BMW">BMW</option>
-            </select>
-            <input type="number" id="quantity" placeholder="Quantity" min="1" value="1">
-            <button onclick="openTrade('buy')">Buy</button>
-            <button onclick="openTrade('sell')">Sell</button>
-            <button onclick="addFunds()">Add Funds</button>
-            <button onclick="withdrawFunds()">Withdraw</button>
-        </div>
-        <canvas id="stockChart" width="800" height="400"></canvas>
-    </div>
+  <h1>Stock Tracker</h1>
+  <div id="stock-list">
+    <!-- Stock items will be dynamically added here -->
+  </div>
 
-    <script>
-        // Mock Stock Data
-        let balance = 30000000; // Starting balance in Rands
-        const stockPrices = {
-            FNB: 120,
-            ABSA: 80,
-            Delta: 5,
-            Capitec: 1500,
-            RMB: 45,
-            Nespers: 200,
-            ARM: 10,
-            Glencore: 500,
-            Mrprice: 180,
-            Woolies: 60,
-            Picknpay: 40,
-            Shoprite: 150,
-            BMW: 700
-        };
+  <script>
+    // List of stock names
+    const stocks = ["pepkro", "shopleft", "paynpick", "packnam", "clickse", "BMR", "Group purple"];
 
-        let chartData = {
-            labels: [], // Time labels
-            datasets: [{
-                label: 'Price',
-                data: [], // Price data
-                borderColor: '#4CAF50',
-                borderWidth: 2,
-                fill: false
-            }]
-        };
+    // Function to fetch data from a specific HTML file
+    async function fetchStockData(stockName) {
+      try {
+        const response = await fetch(`${stockName}.html`);
+        const text = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(text, "text/html");
+        const price = doc.querySelector(".price")?.textContent || "N/A";
+        return price;
+      } catch (error) {
+        console.error(`Error fetching data for ${stockName}:`, error);
+        return "N/A";
+      }
+    }
 
-        // Chart Configuration
-        const ctx = document.getElementById('stockChart').getContext('2d');
-        const stockChart = new Chart(ctx, {
-            type: 'line',
-            data: chartData,
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: false
-                    }
-                },
-                plugins: {
-                    annotation: {
-                        annotations: {
-                            trendline: {
-                                type: 'line',
-                                borderColor: 'orange',
-                                borderWidth: 2,
-                                borderDash: [5, 5],
-                                label: {
-                                    content: 'Trendline',
-                                    enabled: true
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+    // Function to load or initialize share percentage from localStorage
+    function getSharePercentage(stockName) {
+      const storedData = localStorage.getItem(stockName);
+      return storedData ? JSON.parse(storedData).sharePercentage : 0;
+    }
+
+    // Function to update share percentage in localStorage
+    function updateSharePercentage(stockName, percentage) {
+      const data = { sharePercentage: percentage };
+      localStorage.setItem(stockName, JSON.stringify(data));
+    }
+
+    // Function to create stock items
+    async function createStockItems() {
+      const stockList = document.getElementById("stock-list");
+
+      for (const stock of stocks) {
+        const price = await fetchStockData(stock);
+        const sharePercentage = getSharePercentage(stock);
+
+        const stockItem = document.createElement("div");
+        stockItem.className = "stock-item";
+        stockItem.innerHTML = `
+          <span>${stock}</span>
+          <span>Price: ${price}</span>
+          <span>Shares Bought: ${sharePercentage}%</span>
+        `;
+
+        // Redirect to the stock's HTML file on click
+        stockItem.addEventListener("click", () => {
+          window.location.href = `${stock}.html`;
         });
 
-        // Simulate Real-Time Data Updates
-        function updateChart() {
-            const selectedStock = document.getElementById('stock').value;
-            const newPrice = stockPrices[selectedStock] + (Math.random() - 0.5) * 10; // Simulate price fluctuation
-            stockPrices[selectedStock] = newPrice;
-            chartData.labels.push(new Date().toLocaleTimeString());
-            chartData.datasets[0].data.push(newPrice);
-            if (chartData.labels.length > 20) {
-                chartData.labels.shift();
-                chartData.datasets[0].data.shift();
-            }
-            stockChart.update();
-        }
-        setInterval(updateChart, 1000); // Update every second
+        stockList.appendChild(stockItem);
+      }
+    }
 
-        // RSI Calculation (Mock)
-        function calculateRSI() {
-            const prices = chartData.datasets[0].data;
-            if (prices.length < 14) return 50; // Default RSI
-            let gains = 0, losses = 0;
-            for (let i = 1; i < 15; i++) {
-                const change = prices[prices.length - i] - prices[prices.length - i - 1];
-                if (change > 0) gains += change;
-                else losses -= change;
-            }
-            const rs = gains / losses;
-            return 100 - (100 / (1 + rs));
-        }
-
-        // Open Trade
-        function openTrade(type) {
-            const selectedStock = document.getElementById('stock').value;
-            const quantity = parseInt(document.getElementById('quantity').value);
-            const currentPrice = stockPrices[selectedStock];
-            const tradeAmount = quantity * currentPrice;
-
-            if (tradeAmount > balance && type === 'buy') {
-                alert('Insufficient funds!');
-                return;
-            }
-
-            if (type === 'buy') {
-                balance -= tradeAmount;
-            } else {
-                balance += tradeAmount;
-            }
-            updateBalance();
-
-            // Simulate Trade Outcome
-            setTimeout(() => {
-                const outcome = Math.random() > 0.5 ? 'win' : 'loss';
-                const profitLoss = outcome === 'win' ? tradeAmount * 1.1 : tradeAmount * 0.9;
-                balance += (type === 'buy' ? profitLoss : -profitLoss);
-                updateBalance();
-                alert(`Trade ${outcome}! ${profitLoss.toFixed(2)} Rands ${outcome === 'win' ? 'gained' : 'lost'}.`);
-            }, 5000); // Simulate 5-second trade
-        }
-
-        // Add Funds
-        function addFunds() {
-            const amount = parseFloat(prompt('Enter amount to add:'));
-            if (!isNaN(amount)) {
-                balance += amount;
-                updateBalance();
-            }
-        }
-
-        // Withdraw Funds
-        function withdrawFunds() {
-            const amount = parseFloat(prompt('Enter amount to withdraw:'));
-            if (!isNaN(amount) && amount <= balance) {
-                balance -= amount;
-                updateBalance();
-                alert(`Withdrawn ${amount} Rands to game.html.`);
-            } else {
-                alert('Invalid amount or insufficient balance.');
-            }
-        }
-
-        // Update Balance Display
-        function updateBalance() {
-            document.getElementById('balance').innerText = balance.toLocaleString() + ' Rands';
-        }
-    </script>
+    // Initialize the page
+    createStockItems();
+  </script>
 </body>
 </html>
