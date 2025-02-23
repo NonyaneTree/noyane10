@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,78 +14,72 @@
       border: 1px solid #ccc;
       cursor: pointer;
       display: flex;
-      justify-content: space-between;
       align-items: center;
     }
     .stock-item:hover {
       background-color: #f0f0f0;
     }
+    .stock-item img {
+      width: 50px;
+      height: 50px;
+      margin-right: 10px;
+    }
   </style>
 </head>
 <body>
   <h1>Stock Tracker</h1>
-  <div id="stock-list">
-    <!-- Stock items will be dynamically added here -->
-  </div>
+  <div id="stock-list"></div>  <script>
+    const stocks = [
+      { name: "pepkro", img: "pepkro.png" },
+      { name: "shopleft", img: "shoprite.png" },
+      { name: "paynpick", img: "picknpay.png" },
+      { name: "packnam", img: "nampack.png" },
+      { name: "clickse", img: "clicks.png" },
+      { name: "BMR", img: "rmb.png" },
+      { name: "Group purple", img: "purplegroup.png" }
+    ];
 
-  <script>
-    // List of stock names
-    const stocks = ["pepkro", "shopleft", "paynpick", "packnam", "clickse", "BMR", "Group purple"];
-
-    // Function to fetch data from a specific HTML file
     async function fetchStockData(stockName) {
       try {
         const response = await fetch(`${stockName}.html`);
         const text = await response.text();
         const parser = new DOMParser();
         const doc = parser.parseFromString(text, "text/html");
-        const price = doc.querySelector(".price")?.textContent || "N/A";
-        return price;
+        return doc.querySelector(".price")?.textContent || "N/A";
       } catch (error) {
         console.error(`Error fetching data for ${stockName}:`, error);
         return "N/A";
       }
     }
 
-    // Function to load or initialize share percentage from localStorage
     function getSharePercentage(stockName) {
       const storedData = localStorage.getItem(stockName);
       return storedData ? JSON.parse(storedData).sharePercentage : 0;
     }
 
-    // Function to update share percentage in localStorage
-    function updateSharePercentage(stockName, percentage) {
-      const data = { sharePercentage: percentage };
-      localStorage.setItem(stockName, JSON.stringify(data));
-    }
-
-    // Function to create stock items
     async function createStockItems() {
       const stockList = document.getElementById("stock-list");
-
       for (const stock of stocks) {
-        const price = await fetchStockData(stock);
-        const sharePercentage = getSharePercentage(stock);
-
+        const price = await fetchStockData(stock.name);
+        const sharePercentage = getSharePercentage(stock.name);
+        
         const stockItem = document.createElement("div");
         stockItem.className = "stock-item";
         stockItem.innerHTML = `
-          <span>${stock}</span>
+          <img src="${stock.img}" alt="${stock.name}">
+          <span>${stock.name}</span>
           <span>Price: ${price}</span>
           <span>Shares Bought: ${sharePercentage}%</span>
         `;
 
-        // Redirect to the stock's HTML file on click
         stockItem.addEventListener("click", () => {
-          window.location.href = `${stock}.html`;
+          window.location.href = `${stock.name}.html`;
         });
 
         stockList.appendChild(stockItem);
       }
     }
 
-    // Initialize the page
     createStockItems();
-  </script>
-</body>
+  </script></body>
 </html>
