@@ -1,0 +1,78 @@
+<!DOCTYPE html><html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EquityEasy</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 400px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        .balance, .price, .order-section {
+            margin: 20px 0;
+        }
+        button {
+            background-color: red;
+            color: white;
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>EquityEasy - PEPKROR</h2>
+        <div class="price">
+            <h3>Stock Price: R<span id="stockPrice">100</span></h3>
+        </div>
+        <div class="balance">
+            <h3>Your Balance: R<span id="userBalance">1000</span></h3>
+        </div>
+        <div class="order-section">
+            <input type="number" id="investmentAmount" placeholder="Enter Amount">
+            <button onclick="buyStock()">Buy</button>
+            <button onclick="sellStock()">Sell</button>
+        </div>
+    </div><script>
+    let balance = 1000;
+    let stockPrice = 100;
+
+    function updatePrice() {
+        let change = (Math.random() < 0.5 ? -10 : 10);
+        stockPrice = Math.max(100, Math.min(1200, stockPrice + change));
+        document.getElementById('stockPrice').innerText = stockPrice;
+    }
+    setInterval(updatePrice, 1000);
+
+    function buyStock() {
+        let amount = parseFloat(document.getElementById('investmentAmount').value);
+        if (amount > balance || amount <= 0) {
+            alert("Insufficient balance or invalid amount");
+            return;
+        }
+        balance -= amount;
+        document.getElementById('userBalance').innerText = balance.toFixed(2);
+        alert("Stock bought!");
+    }
+
+    function sellStock() {
+        let amount = parseFloat(document.getElementById('investmentAmount').value);
+        balance += amount;
+        document.getElementById('userBalance').innerText = balance.toFixed(2);
+        alert("Stock sold!");
+    }
+</script>
+
+</body>
+</html>
